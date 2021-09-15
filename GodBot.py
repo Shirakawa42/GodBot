@@ -71,7 +71,7 @@ class GodBot(commands.Bot):
 	"""
 	def __init__(self):
 		super().__init__(command_prefix="!")
-		self.bot_token = "NzQ1NjA4OTExNDkwMzgzOTQz.Xz0QaQ.dZ5VoGpSxQrwnF-LHvTATQsod2M"
+		self.bot_token = "NzQ1NjA4OTExNDkwMzgzOTQz.Xz0QaQ.uTKHwBlmaLy32fcDQItfRARCK9E"
 		self.add_cog(HandleMessage(self))
 
 	def start_bot(self):
