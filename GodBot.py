@@ -1,6 +1,7 @@
 from discord.ext import commands
 import shlex
 import re
+import json
 
 """
 !when [author, message] [equal, match, startswith, endswith]
@@ -40,8 +41,16 @@ class HandleMessage(commands.Cog):
 
 	def __init__(self, bot):
 		self.bot = bot
-		self.conditions = []
-		self.actions = []
+		try:
+			with open("data.json", "r") as file:
+				data = json.load(file)
+
+				self.conditions = data[0]
+				self.actions = data[1]
+				print(self.conditions)
+		except Exception:
+			self.conditions = []
+			self.actions = []
 
 	@staticmethod
 	def is_condition_true(condition, message):
@@ -109,6 +118,8 @@ class HandleMessage(commands.Cog):
 				if len(instruction_list[4]) >= 1:
 					self.conditions.append(condition)
 					self.actions.append([instruction_list[4], instruction_list[5]])
+					with open("data.json", "w") as file:
+						json.dump([self.conditions, self.actions], file)
 
 class GodBot(commands.Bot):
 	"""
