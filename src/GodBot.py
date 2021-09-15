@@ -134,5 +134,5 @@ class GodBot(commands.Bot):
 	def start_bot(self):
 		self.run(self.bot_token)
 
-x = GodBot()
-x.start_bot()
+bot = GodBot()
+bot.start_bot()

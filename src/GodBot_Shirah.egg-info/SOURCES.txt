@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/GodBot_Shirah.egg-info/PKG-INFO
+src/GodBot_Shirah.egg-info/SOURCES.txt
+src/GodBot_Shirah.egg-info/dependency_links.txt
+src/GodBot_Shirah.egg-info/top_level.txt
