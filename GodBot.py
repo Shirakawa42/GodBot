@@ -19,6 +19,12 @@ class HandleMessage(commands.Cog):
 		'endswith': str.endswith
 	}
 
+	authorized_words = {
+		1: ['author', 'message'],
+		2: ['equal', 'match', 'startswith', 'endswith'],
+		4: ['send', 'delete', 'react']
+	}
+
 	def __init__(self, bot):
 		self.bot = bot
 		self.conditions = []
@@ -26,18 +32,48 @@ class HandleMessage(commands.Cog):
 
 	@staticmethod
 	def is_condition_true(condition, message):
-		msg_content = message.author if condition[0] == 'author' else message.content
-		cmp_func = HandleMessage.compare_funcs[condition[1]]
-		return cmp_func(str(msg_content), str(condition[2]))
+		for subject in condition[0]:
+			msg_content = message.author if subject == 'author' else message.content
+			for cmp_f in condition[1]:
+				cmp_func = HandleMessage.compare_funcs[cmp_f]
+				if cmp_func(str(msg_content), str(condition[2])) == False:
+					return False
+		return True
 
 	@staticmethod
-	async def execute_action(bot, action, message):
-		if action[0] == 'send':
-			await message.channel.send(action[1])
-		elif action[0] == 'delete':
-			await message.delete()
-		elif action[0] == 'react':
-			await message.add_reaction(action[1])
+	async def execute_action(actionList, message):
+		deleted = False
+		for action in actionList[0]:
+			if action == 'send':
+				await message.channel.send(actionList[1])
+			elif action == 'delete' and deleted == False:
+				deleted = True
+				await message.delete()
+			elif action == 'react' and deleted == False:
+				await message.add_reaction(actionList[1])
+
+	@staticmethod
+	def check_and_between_words(words, authorized_list):
+		for word, i in zip(words, range(len(words))):
+			if word in authorized_list and i % 2 == 0:
+				pass
+			elif word == '&' and i % 2 == 1 and i < len(words)-1:
+				pass
+			else:
+				return []
+		return list(filter(lambda a: a != '&', words))
+
+	@staticmethod
+	def split_instructions(instructions):
+		for i in [1, 2, 4]:
+			if instructions[i].startswith('('):
+				instructions[i] = instructions[i][1:-1]
+			instructions[i] = shlex.split(instructions[i])
+			instructions[i] = HandleMessage.check_and_between_words(instructions[i], HandleMessage.authorized_words[i])
+		for i in [3, 5]:
+			if len(instructions) > i and instructions[i].startswith('"'):
+				instructions[i] = instructions[i][1:-1]
+		return instructions
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
@@ -45,24 +81,23 @@ class HandleMessage(commands.Cog):
 			return
 		for condition, action in zip(self.conditions, self.actions):
 			if (HandleMessage.is_condition_true(condition, message)):
-				await HandleMessage.execute_action(self.bot, action, message)
+				await HandleMessage.execute_action(action, message)
 
 	@commands.command("when")
 	async def when(self, ctx):
-		instruction_list = shlex.split(ctx.message.content)
+		instruction_list = re.findall('\[[^\]]*\]|\([^\)]*\)|\"[^\"]*\"|\S+', ctx.message.content)
 		if len(instruction_list) < 5:
 			return
-		if instruction_list[1] in ['author', 'message']:
+		instruction_list = HandleMessage.split_instructions(instruction_list)
+		if len(instruction_list[1]) >= 1:
 			condition = [instruction_list[1]]
-			if instruction_list[2] in ['equal', 'match', 'startswith', 'endswith']:
+			if len(instruction_list[2]) >= 1:
 				condition.extend([instruction_list[2], instruction_list[3]])
-				if instruction_list[4] in ['send', 'delete', 'react']:
-					if instruction_list[4] != 'delete' and len(instruction_list) >= 6:
-						self.conditions.append(condition)
-						self.actions.append([instruction_list[4], instruction_list[5]])
-					elif instruction_list[4] == 'delete':
-						self.conditions.append(condition)
-						self.actions.append([instruction_list[4]])
+				if len(instruction_list[4]) >= 1:
+					self.conditions.append(condition)
+					self.actions.append([instruction_list[4], instruction_list[5]])
+					print(self.conditions)
+					print(self.actions)
 
 class GodBot(commands.Bot):
 	"""
