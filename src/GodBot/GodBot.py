@@ -2,6 +2,7 @@ from discord.ext import commands
 import shlex
 import re
 import json
+from pathlib import Path
 
 """
 !when [author, message] [equal, match, startswith, endswith]
@@ -34,15 +35,15 @@ class HandleMessage(commands.Cog):
 	}
 
 	authorized_words = {
-		1: ['author', 'message'],
-		2: ['equal', 'match', 'startswith', 'endswith'],
-		4: ['send', 'delete', 'react']
+		1: ('author', 'message'),
+		2: ('equal', 'match', 'startswith', 'endswith'),
+		4: ('send', 'delete', 'react')
 	}
 
 	def __init__(self, bot):
 		self.bot = bot
 		try:
-			with open("data.json", "r") as file:
+			with open(str(Path.home())+"/data.json", "r") as file:
 				data = json.load(file)
 
 				self.conditions = data[0]
@@ -71,7 +72,10 @@ class HandleMessage(commands.Cog):
 				deleted = True
 				await message.delete()
 			elif action == 'react' and deleted == False:
-				await message.add_reaction(actionList[1])
+				try:
+					await message.add_reaction(actionList[1])
+				except Exception:
+					pass
 
 	@staticmethod
 	def check_and_between_words(words, authorized_list):
@@ -117,7 +121,7 @@ class HandleMessage(commands.Cog):
 				if len(instruction_list[4]) >= 1:
 					self.conditions.append(condition)
 					self.actions.append([instruction_list[4], instruction_list[5]])
-					with open("data.json", "w") as file:
+					with open(str(Path.home())+"/data.json", "w") as file:
 						json.dump([self.conditions, self.actions], file)
 
 class GodBot(commands.Bot):
@@ -132,6 +136,3 @@ class GodBot(commands.Bot):
 
 	def start_bot(self):
 		self.run(self.bot_token)
-
-bot = GodBot()
-bot.start_bot()

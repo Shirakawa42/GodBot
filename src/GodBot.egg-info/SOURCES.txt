@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/GodBot/GodBot.py
+src/GodBot/__init__.py
+src/GodBot.egg-info/PKG-INFO
+src/GodBot.egg-info/SOURCES.txt
+src/GodBot.egg-info/dependency_links.txt
+src/GodBot.egg-info/top_level.txt
