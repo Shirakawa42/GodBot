@@ -6,6 +6,19 @@ import re
 !when [author, message] [equal, match, startswith, endswith]
 		"filter_parameter" [send, delete, react] "action_parameter"
 """
+class RegexMatch(object):
+	"""
+	This class is used to handle regex in matching
+	"""
+	@staticmethod
+	def match(str1, str2):
+		try:
+			str2 = re.compile(str2)		
+			if str2.match(str1) != None:
+				return True
+		except Exception:
+			print("Ce regex est moche et ne fonctionne pas")
+		return False
 
 class HandleMessage(commands.Cog):
 	"""
@@ -14,7 +27,7 @@ class HandleMessage(commands.Cog):
 	"""
 	compare_funcs = {
 		'equal': str.__eq__,
-		'match': str.__contains__,
+		'match': RegexMatch.match,
 		'startswith': str.startswith,
 		'endswith': str.endswith
 	}
@@ -71,7 +84,7 @@ class HandleMessage(commands.Cog):
 			instructions[i] = shlex.split(instructions[i])
 			instructions[i] = HandleMessage.check_and_between_words(instructions[i], HandleMessage.authorized_words[i])
 		for i in [3, 5]:
-			if len(instructions) > i and instructions[i].startswith('"'):
+			if len(instructions) > i and instructions[i].startswith('"') and instructions[i].endswith('"'):
 				instructions[i] = instructions[i][1:-1]
 		return instructions
 
@@ -96,8 +109,6 @@ class HandleMessage(commands.Cog):
 				if len(instruction_list[4]) >= 1:
 					self.conditions.append(condition)
 					self.actions.append([instruction_list[4], instruction_list[5]])
-					print(self.conditions)
-					print(self.actions)
 
 class GodBot(commands.Bot):
 	"""
