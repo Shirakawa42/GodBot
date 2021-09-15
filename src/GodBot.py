@@ -18,7 +18,7 @@ class RegexMatch(object):
 			if str2.match(str1) != None:
 				return True
 		except Exception:
-			print("Ce regex est moche et ne fonctionne pas")
+			pass
 		return False
 
 class HandleMessage(commands.Cog):
@@ -47,7 +47,6 @@ class HandleMessage(commands.Cog):
 
 				self.conditions = data[0]
 				self.actions = data[1]
-				print(self.conditions)
 		except Exception:
 			self.conditions = []
 			self.actions = []
