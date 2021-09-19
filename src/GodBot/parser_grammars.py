@@ -9,9 +9,9 @@ WHEN_SUBJECTS = ["message", "author"]
 WHEN_ACTIONS = ["send", "delete", "react"]
 WHEN_ACTIONS_NO_TEXT = ["delete"]
 WHEN_CMPS = ["equal", "startswith", "endswith", "match"]
-GRAMMAR_COMMAND_WHEN = Grammar(grammar_maker("!when", "multi", [WHEN_SUBJECTS], "multi",
-                                             [WHEN_CMPS], "any", "or", [["multi", [WHEN_ACTIONS],
-                                             "any"], [WHEN_ACTIONS_NO_TEXT]]))
+GRAMMAR_COMMAND_WHEN = Grammar(grammar_maker(
+    "!when", "multi", [WHEN_SUBJECTS], "multi", [WHEN_CMPS], "any", "or",
+    [["multi", [WHEN_ACTIONS], "any"], [WHEN_ACTIONS_NO_TEXT]]))
 
 GRAMMAR_COMMAND_INITPLAYER = Grammar(grammar_maker("!initPlayer", "any"))
 

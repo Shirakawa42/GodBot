@@ -26,13 +26,13 @@ class HandleMessage(commands.Cog):
     def save_in_json(self):
         "save !when in a json"
         with open(os.path.join(Path.home(), "whens.json"), "w",
-                      encoding="utf-8") as when_commands_file:
+                  encoding="utf-8") as when_commands_file:
             json.dump(self.whens, when_commands_file)
 
     def load_json(self):
         "load !when json"
         with open(os.path.join(Path.home(), "whens.json"), "r",
-                      encoding="utf-8") as when_commands_file:
+                  encoding="utf-8") as when_commands_file:
             self.whens = json.load(when_commands_file)
 
     @commands.Cog.listener()

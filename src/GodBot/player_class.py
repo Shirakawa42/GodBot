@@ -49,16 +49,11 @@ class Player():
 
     def get_infos(self):
         "Return the player informations beautifully"
-        beauty = "`"
-        beauty += "Player name: " + str(self.name)
-        beauty += "\nPlayer race: " + str(self.race)
-        beauty += "\nPlayer level: " + str(self.level)
-        beauty += "\nTechnologie level: " + str(self.tech)
-        beauty += "\nMoney: " + str(self.money)
-        beauty += "\nArmy: "
+        beauty = f"""```\nPlayer name: {self.name}\nPlayer race: {self.race}\nPlayer level: """
+        beauty += f"""{self.level}\nTechnologie level: {self.tech}\nMoney: {self.money}\nArmy:"""
         for ship in self.army:
             beauty += "\n\t" + ship.str
-        beauty += "`"
+        beauty += "```"
         return beauty
 
     @property

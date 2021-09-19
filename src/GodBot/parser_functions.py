@@ -110,6 +110,7 @@ def grammar_maker_or(rule, depth, i, counter=None):
     i[0] += 1
     return [grammar_validator, grammar_rules]
 
+
 def grammar_maker_multi(rule, depth, i, counter=None):
     "The 'multi' parameter from grammar_maker"
     grammar_rules = {}
@@ -127,10 +128,12 @@ def space_to_underscore(string):
     "replace whitespaces by underscore in a string"
     return string.replace(" ", "_")
 
+
 GRAMMAR_MAKER_COMMANDS = {
     "or": grammar_maker_or,
     "multi": grammar_maker_multi
 }
+
 
 def grammar_maker(*rules, depth=0, counter=None):
     """
@@ -166,6 +169,7 @@ def grammar_maker(*rules, depth=0, counter=None):
     if depth == 0:
         return grammar_validator_rules_linker(grammar_validator, grammar_rules)
     return [grammar_validator, grammar_rules]
+
 
 def formated_tree_from_grammar(grammar: Grammar, input_str: str):
     "Return a formated tree of a grammar with the input"

@@ -59,7 +59,7 @@ class RpgCommands(commands.Cog):
                 formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_INITPLAYER,
                                                            ctx.message.content)
                 self.players[str(ctx.message.author)] = Player(str(ctx.message.author),
-                                                                   formated_tree[1][0])
+                                                               formated_tree[1][0])
             except parsimonious.exceptions.ParseError as error:
                 await ctx.message.channel.send(error)
         else:
@@ -109,7 +109,7 @@ class RpgCommands(commands.Cog):
                 if (formated_tree[1][0] in self.players and
                         formated_tree[1][0] != str(ctx.message.author)):
                     fight_msg = fight_simulator(self.players[str(ctx.message.author)],
-                                                           self.players[formated_tree[1][0]])
+                                                self.players[formated_tree[1][0]])
                     await ctx.message.channel.send(fight_msg)
                     self.save_in_json_rpg()
                 else:
