@@ -7,11 +7,12 @@ from pathlib import Path
 
 from discord.ext import commands
 import parsimonious
-from handle_rpg import Player
-import handle_rpg
+from player_class import Player
+from rpg_exceptions import NotEnoughMoney, TooLowInvestment
 from parser_grammars import GRAMMAR_COMMAND_INITPLAYER
 from parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
 from parser_functions import formated_tree_from_grammar
+from rpg_functions import fight_simulator
 
 
 class RpgCommands(commands.Cog):
@@ -57,8 +58,8 @@ class RpgCommands(commands.Cog):
             try:
                 formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_INITPLAYER,
                                                            ctx.message.content)
-                self.players[str(ctx.message.author)] = handle_rpg.Player(str(ctx.message.author),
-                                                                          formated_tree[1][0])
+                self.players[str(ctx.message.author)] = Player(str(ctx.message.author),
+                                                                   formated_tree[1][0])
             except parsimonious.exceptions.ParseError as error:
                 await ctx.message.channel.send(error)
         else:
@@ -90,9 +91,9 @@ class RpgCommands(commands.Cog):
                 await ctx.message.channel.send(f"{formated_tree[1][0]} created !")
             except parsimonious.exceptions.ParseError:
                 await ctx.message.channel.send("error, use: \"!help buildShip\"")
-            except handle_rpg.TooLowInvestment:
+            except TooLowInvestment:
                 await ctx.message.channel.send("Minimum investment: 50")
-            except handle_rpg.NotEnoughMoney:
+            except NotEnoughMoney:
                 await ctx.message.channel.send("Not enough money")
         else:
             msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race'"
@@ -107,7 +108,7 @@ class RpgCommands(commands.Cog):
                                                            ctx.message.content)
                 if (formated_tree[1][0] in self.players and
                         formated_tree[1][0] != str(ctx.message.author)):
-                    fight_msg = handle_rpg.fight_simulator(self.players[str(ctx.message.author)],
+                    fight_msg = fight_simulator(self.players[str(ctx.message.author)],
                                                            self.players[formated_tree[1][0]])
                     await ctx.message.channel.send(fight_msg)
                     self.save_in_json_rpg()
