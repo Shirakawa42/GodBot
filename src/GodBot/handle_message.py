@@ -2,13 +2,14 @@
 
 
 import json
+import os.path
 from pathlib import Path
 
 from discord.ext import commands
 import parsimonious
-from check_condition import is_condition_true
-from parser_functions import format_tree_list, tree_reader
-from parser_grammars import grammar_command_when
+from check_condition import is_condition_true, execute_action
+from parser_functions import formated_tree_from_grammar
+from parser_grammars import GRAMMAR_COMMAND_WHEN
 
 
 class HandleMessage(commands.Cog):
@@ -18,25 +19,21 @@ class HandleMessage(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         try:
-            with open(str(Path.home())+"/whens.json", "r", encoding="utf-8") as when_commands_file:
-                whens_command_data = json.load(when_commands_file)
-                self.whens = whens_command_data
+            self.load_json()
         except FileNotFoundError:
             self.whens = []
 
-    @staticmethod
-    async def execute_action(action_list, message):
-        "Execute all actions in the action_list on the message / message channel"
-        for action in action_list[0]:
-            try:
-                if action == 'send':
-                    await message.channel.send(action_list[1][0])
-                elif action == 'delete':
-                    await message.delete()
-                elif action == 'react':
-                    await message.add_reaction(action_list[1][0])
-            except commands.MessageNotFound:
-                print("Message does not exist or have already been deleted")
+    def save_in_json(self):
+        "save !when in a json"
+        with open(os.path.join(Path.home(), "whens.json"), "w",
+                      encoding="utf-8") as when_commands_file:
+            json.dump(self.whens, when_commands_file)
+
+    def load_json(self):
+        "load !when json"
+        with open(os.path.join(Path.home(), "whens.json"), "r",
+                      encoding="utf-8") as when_commands_file:
+            self.whens = json.load(when_commands_file)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -45,25 +42,29 @@ class HandleMessage(commands.Cog):
             return
         for when in self.whens:
             if is_condition_true([when[1], when[2], when[3]], message):
-                await HandleMessage.execute_action([when[4][:-1:], when[4][-1::]], message)
+                if len(when[4]) > 1:
+                    await execute_action([when[4][:-1:], when[4][-1::]], message)
+                else:
+                    await execute_action([when[4], when[4]], message)
 
     @commands.command("reset")
     async def reset(self, ctx):
-        "Handle the '!reset' command"
-        with open(str(Path.home())+"/whens.json", "w", encoding="utf-8") as when_commands_file:
-            json.dump([], when_commands_file)
+        "!reset: Delete every rules made with !when command"
         self.whens = []
+        self.save_in_json()
         await ctx.message.channel.send("Every !when reseted")
 
     @commands.command("when")
     async def when(self, ctx):
-        "Handle the '!when' command"
+        """
+        !when subject comparator text action text: Create a rule
+        example 1: !when message equal "nice" react ":+1:"
+        example 2: !when author match "42" send "je t'aime"
+        example 3: !when message match "insulte" delete
+        """
         try:
-            parser = grammar_command_when.parse(ctx.message.content)
-            tree_list = tree_reader(parser)
-            formated_tree = format_tree_list(tree_list)
+            formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_WHEN, ctx.message.content)
             self.whens.append(formated_tree)
-            with open(str(Path.home())+"/whens.json", "w", encoding="utf-8") as when_commands_file:
-                json.dump(self.whens, when_commands_file)
-        except parsimonious.exceptions.ParseError as error:
-            await ctx.message.channel.send(error)
+            self.save_in_json()
+        except parsimonious.exceptions.ParseError:
+            await ctx.message.channel.send("error, use \"!help when\"")
