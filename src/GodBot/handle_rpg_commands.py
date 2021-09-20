@@ -5,7 +5,7 @@ import json
 import os.path
 from pathlib import Path
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 import parsimonious
 from player_class import Player
 from rpg_exceptions import NotEnoughMoney, TooLowInvestment
@@ -30,12 +30,31 @@ class RpgCommands(commands.Cog):
         except FileNotFoundError:
             pass
 
+    @tasks.loop(seconds=8)
+    async def eight_sec_loop(self):
+        "looping every 8 seconds"
+        for _, player in self.players.items():
+            player.periodic_money()
+
+    @tasks.loop(minutes=5)
+    async def five_min_loop(self):
+        "looping every 5 minutes"
+        for _, player in self.players.items():
+            player.luck()
+        self.save_in_json_rpg()
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        "starts time_loop() functions"
+        self.eight_sec_loop.start()
+        self.five_min_loop.start()
+
     def players_json_to_players(self, players_json):
         "Transform rpg_data loaded from the json into useable rpg_data"
         players = {}
         for player_dict in players_json:
-            players[player_dict["name"]] = Player(player_dict["name"],
-                                                  player_dict["race"], player_dict)
+            players[player_dict["name"]] = Player(
+                player_dict["name"], player_dict["race"], player_dict)
         self.players = players
 
     def players_to_players_json(self):
@@ -46,7 +65,7 @@ class RpgCommands(commands.Cog):
         return players_json
 
     def save_in_json_rpg(self):
-        "save everything related to the RPG inside RPG.json"
+        "save everything related to the RPG inside RPG_players.json"
         with open(os.path.join(Path.home(), "RPG_players.json"), "w",
                   encoding="utf-8") as players_file:
             json.dump(self.players_to_players_json(), players_file)
@@ -81,13 +100,11 @@ class RpgCommands(commands.Cog):
         """
         if str(ctx.message.author) in self.players:
             try:
-                formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_BUILDSHIP,
-                                                           ctx.message.content)
-                self.players[str(ctx.message.author)].create_ship(formated_tree[1][0],
-                                                                  int(formated_tree[2][0]),
-                                                                  int(formated_tree[3][0]),
-                                                                  int(formated_tree[4][0]))
-                self.save_in_json_rpg()
+                formated_tree = formated_tree_from_grammar(
+                    GRAMMAR_COMMAND_BUILDSHIP, ctx.message.content)
+                self.players[str(ctx.message.author)].create_ship(
+                    formated_tree[1][0], int(formated_tree[2][0]), int(formated_tree[3][0]),
+                    int(formated_tree[4][0]))
                 await ctx.message.channel.send(f"{formated_tree[1][0]} created !")
             except parsimonious.exceptions.ParseError:
                 await ctx.message.channel.send("error, use: \"!help buildShip\"")
@@ -104,14 +121,13 @@ class RpgCommands(commands.Cog):
         "!attack other_player: Fight against another player"
         if str(ctx.message.author) in self.players:
             try:
-                formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_ATTACK,
-                                                           ctx.message.content)
+                formated_tree = formated_tree_from_grammar(
+                    GRAMMAR_COMMAND_ATTACK, ctx.message.content)
                 if (formated_tree[1][0] in self.players and
                         formated_tree[1][0] != str(ctx.message.author)):
-                    fight_msg = fight_simulator(self.players[str(ctx.message.author)],
-                                                self.players[formated_tree[1][0]])
+                    fight_msg = fight_simulator(
+                        self.players[str(ctx.message.author)], self.players[formated_tree[1][0]])
                     await ctx.message.channel.send(fight_msg)
-                    self.save_in_json_rpg()
                 else:
                     await ctx.message.channel.send("You can't fight against yourself !")
             except parsimonious.exceptions.ParseError:

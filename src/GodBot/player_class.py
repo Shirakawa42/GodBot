@@ -1,6 +1,7 @@
 "This module contains the Player() class"
 
 
+from random import randint
 from ship_class import Ship
 from rpg_exceptions import NotEnoughMoney, TooLowInvestment
 
@@ -23,10 +24,21 @@ class Player():
                 self.army.append(Ship(ship["name"], ship["aoe"], ship["max_hp"],
                                       ship["damages"], ship["level"], ship["tech"]))
 
+    def periodic_money(self):
+        "Add money based on level and tech"
+        self.money += self.level + self.tech
+
     def won(self, looser):
         "called when the player win a fight"
         self.money += int(looser.money / 2)
         looser.money /= 2
+
+    def luck(self):
+        "with luck, some free ships may appear"
+        if (randint(0, 100)) <= 10:
+            investment = randint(50 * self.level, 150 * self.level)
+            self.money += investment
+            self.create_ship("lucky", randint(1, 4), randint(1, 5), investment)
 
     def create_ship(self, ship_name, ship_aoe, ship_tankiness, investment):
         "ship: {ship_name, aoe, hp, max_hp, damages, tech}"
@@ -44,7 +56,7 @@ class Player():
         ship_damages = investment / ship_aoe / ship_tankiness * (1.1 ** self.tech) * 2
         self.money -= investment
         self.army.append(Ship(ship_name, ship_aoe, int(ship_hp),
-                              int(ship_damages), self.level, self.tech))
+                              int(ship_damages), 1, self.tech))
 
     def get_infos(self):
         "Return the player informations beautifully"
@@ -52,7 +64,7 @@ class Player():
         beauty += f"""{self.level}\nTechnologie level: {self.tech}\nMoney: {self.money}\nArmy:"""
         for ship in self.army:
             beauty += "\n\t" + ship.str
-        beauty += "```"
+        beauty += f"\nArmy power: {self.army_power}```"
         return beauty
 
     @property
