@@ -7,8 +7,8 @@ import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from handle_rpg_commands import RpgCommands
-from handle_message import HandleMessage
+from GodBot.handle_rpg_commands import RpgCommands
+from GodBot.handle_message import HandleMessage
 
 
 class NoEnvException(Exception):
