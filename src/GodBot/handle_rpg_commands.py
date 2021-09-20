@@ -46,6 +46,7 @@ class RpgCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         "starts time_loop() functions"
+        # pylint: disable=no-member
         self.eight_sec_loop.start()
         self.five_min_loop.start()
 
