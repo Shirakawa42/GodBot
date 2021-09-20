@@ -23,11 +23,10 @@ class Player():
                 self.army.append(Ship(ship["name"], ship["aoe"], ship["max_hp"],
                                       ship["damages"], ship["level"], ship["tech"]))
 
-    def won(self):
+    def won(self, looser):
         "called when the player win a fight"
-        for ship in self.army:
-            ship.level_up()
-        self.money += int(150 ** (1 + self.tech / 30))
+        self.money += int(looser.money / 2)
+        looser.money /= 2
 
     def create_ship(self, ship_name, ship_aoe, ship_tankiness, investment):
         "ship: {ship_name, aoe, hp, max_hp, damages, tech}"
@@ -55,6 +54,14 @@ class Player():
             beauty += "\n\t" + ship.str
         beauty += "```"
         return beauty
+
+    @property
+    def army_power(self):
+        "Return the total army power of this player"
+        army_power = 0
+        for ship in self.army:
+            army_power += ship.power
+        return army_power
 
     @property
     def dict(self):

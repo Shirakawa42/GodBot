@@ -20,13 +20,13 @@ class Ship():
     def __post_init__(self):
         self.cur_hp = self.max_hp
 
-    def damages_ship(self, damages, other_tech, other_level):
-        "Reduce HP oh the ship"
-        bonus_damages = max((other_level - self.level) / 10.0 + 1.0, 0.3)
-        if randint(0, 100) < max(90 - ((self.tech - other_tech) * 5), 25):
-            self.cur_hp -= int(damages * bonus_damages)
+    def damages_ship(self, other_ship: 'Ship'):
+        "Damage this ship"
+        bonus_damages = max((other_ship.level - self.level) / 10.0 + 1.0, 0.3)
+        if randint(0, 100) < max(90 - ((self.tech - other_ship.tech) * 5), 25):
+            self.cur_hp -= int(other_ship.damages * bonus_damages)
 
-    def is_dead(self):
+    def is_dead(self) -> bool:
         "Return true if ship is dead"
         if self.cur_hp <= 0 or (self.cur_hp/self.max_hp < 0.6
                                 and randint(0, 80) > (self.cur_hp/self.max_hp)*100):
@@ -39,6 +39,18 @@ class Ship():
         self.max_hp = int(self.max_hp * 1.05)
         self.cur_hp = self.max_hp
         self.damages = int(self.damages * 1.05)
+
+    def attack_army(self, army):
+        "Order this ship to shoot randomly in an army"
+        for _ in range(self.aoe):
+            army[randint(0, len(army))].damages_ship(self)
+
+    @property
+    def power(self):
+        "Return a number representing the powerfullness of this ship"
+        return int(
+            (self.cur_hp / 5 + self.aoe * 50 + self.damages)
+            ** (1 + self.tech / 50) ** (1 + self.level / 50))
 
     @property
     def percent(self):
