@@ -2,8 +2,8 @@
 
 
 from random import randint
-from GodBot.ship_class import Ship
-from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment
+from ship_class import Ship
+from rpg_exceptions import NotEnoughMoney, TooLowInvestment
 
 
 class Player():

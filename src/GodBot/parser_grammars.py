@@ -2,7 +2,7 @@
 
 
 from parsimonious.grammar import Grammar
-from GodBot.parser_functions import grammar_maker
+from parser_functions import grammar_maker
 
 
 WHEN_SUBJECTS = ["message", "author"]

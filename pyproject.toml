@@ -2,6 +2,8 @@
 requires = [
     "discord",
     "setuptools >= 42",
-    "wheel"
+    "wheel",
+    "parsimonious",
+    "python-dotenv"
 ]
 build-backend = "setuptools.build_meta"
