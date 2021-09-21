@@ -2,7 +2,7 @@
 
 
 from parsimonious.grammar import Grammar
-from GodBot.parser_functions import grammar_maker
+from parser_functions import grammar_maker
 
 
 WHEN_SUBJECTS = ["message", "author"]
@@ -18,3 +18,6 @@ GRAMMAR_COMMAND_INITPLAYER = Grammar(grammar_maker("!initPlayer", "any"))
 GRAMMAR_COMMAND_ATTACK = Grammar(grammar_maker("!attack", "any"))
 
 GRAMMAR_COMMAND_BUILDSHIP = Grammar(grammar_maker("!buildShip", "any", "nb", "nb", "nb"))
+
+GRAMMAR_COMMAND_SEND = Grammar(grammar_maker("!send", "any", "or",
+                                             [["ship", "any"], ["money", "nb"]]))

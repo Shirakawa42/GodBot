@@ -7,8 +7,8 @@ import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from GodBot.handle_rpg_commands import RpgCommands
-from GodBot.handle_message import HandleMessage
+from handle_rpg_commands import RpgCommands
+from handle_message import HandleMessage
 
 
 class NoEnvException(Exception):
@@ -29,3 +29,5 @@ class GodBot(commands.Bot):
     def start_bot(self):
         "Start the bot"
         self.run(self.bot_token)
+
+GodBot().start_bot()

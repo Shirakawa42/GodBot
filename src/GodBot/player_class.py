@@ -2,8 +2,8 @@
 
 
 from random import randint
-from GodBot.ship_class import Ship
-from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment
+from ship_class import Ship
+from rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
 
 
 class Player():
@@ -33,9 +33,28 @@ class Player():
         self.money += int(looser.money / 2)
         looser.money /= 2
 
+    def send_money(self, other_player, amount):
+        "send money to another player"
+        if self.money >= amount:
+            self.money -= amount
+            other_player.money += amount
+        else:
+            raise NotEnoughMoney
+
+    def send_ship(self, other_player, ship_name):
+        "send ship to another player"
+        ship_found = False
+        for ship in self.army:
+            if ship.name == ship_name:
+                other_player.army.append(ship)
+                self.army.remove(ship)
+                ship_found = True
+        if not ship_found:
+            raise NoShip
+
     def luck(self):
         "with luck, some free ships may appear"
-        if (randint(0, 100)) <= 10:
+        if (randint(0, 100)) <= 2:
             investment = randint(50 * self.level, 150 * self.level)
             self.money += investment
             self.create_ship("lucky", randint(1, 4), randint(1, 5), investment)

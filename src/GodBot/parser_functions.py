@@ -138,7 +138,7 @@ GRAMMAR_MAKER_COMMANDS = {
 def grammar_maker(*rules, depth=0, counter=None):
     """
     Return a Grammar() of the input from easy to use arguments
-    args: string - "any" - "number" - [...] - "or" [[], []] - "multi" []
+    args: word - "any" - "nb" - [...] - "or" [[], []] - "multi" []
     first argument is always the command
     """
     if depth == 0:

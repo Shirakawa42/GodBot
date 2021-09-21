@@ -7,12 +7,39 @@ from pathlib import Path
 
 from discord.ext import commands, tasks
 import parsimonious
-from GodBot.player_class import Player
-from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment
-from GodBot.parser_grammars import GRAMMAR_COMMAND_INITPLAYER
-from GodBot.parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
-from GodBot.parser_functions import formated_tree_from_grammar
-from GodBot.rpg_functions import fight_simulator
+from player_class import Player
+from rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
+from parser_grammars import GRAMMAR_COMMAND_INITPLAYER, GRAMMAR_COMMAND_SEND
+from parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
+from parser_functions import formated_tree_from_grammar
+from rpg_functions import fight_simulator
+
+
+def is_player_initialized(function):
+    """Decorator that check if player is initialized or not,
+    if not, function is not called and print error"""
+    async def new_function(self, ctx):
+        if str(ctx.message.author) in self.players:
+            await function(self, ctx)
+        else:
+            msg = f"Player '{ctx.message.author}' not initialized, please use !initPlayer \"race\""
+            await ctx.message.channel.send(msg)
+    return new_function
+
+
+def parse_grammar(grammar):
+    """Decorator that check if grammar is valid or not with the input,
+        if not, function is not called and print error"""
+    def parse_grammar_dec(function):
+        async def new_function(self, ctx):
+            try:
+                formated_tree = formated_tree_from_grammar(grammar, ctx.message.content)
+                await function(self, ctx, formated_tree)
+            except parsimonious.exceptions.ParseError:
+                await ctx.message.channel.send(
+                    "Command not well formated, use !help \"command name\"")
+        return new_function
+    return parse_grammar_dec
 
 
 class RpgCommands(commands.Cog):
@@ -72,67 +99,84 @@ class RpgCommands(commands.Cog):
             json.dump(self.players_to_players_json(), players_file)
 
     @commands.command("initPlayer")
-    async def init_player(self, ctx):
+    @parse_grammar(grammar=GRAMMAR_COMMAND_INITPLAYER)
+    async def init_player(self, ctx, formated_tree):
         "!initPlayer \"race\": Initialize yourself"
         if str(ctx.message.author) not in self.players:
-            try:
-                formated_tree = formated_tree_from_grammar(GRAMMAR_COMMAND_INITPLAYER,
-                                                           ctx.message.content)
-                self.players[str(ctx.message.author)] = Player(str(ctx.message.author),
-                                                               formated_tree[1][0])
-            except parsimonious.exceptions.ParseError as error:
-                await ctx.message.channel.send(error)
+            self.players[str(ctx.message.author)] = Player(
+                str(ctx.message.author), formated_tree[1][0])
         else:
             await ctx.message.channel.send(f"{ctx.message.author} already initialized.")
 
     @commands.command("showMe")
+    @is_player_initialized
     async def show_me(self, ctx):
         "!showMe: Show all informations about yourself"
-        if str(ctx.message.author) in self.players:
-            await ctx.message.channel.send(self.players[str(ctx.message.author)].get_infos())
-        else:
-            msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race'"
-            await ctx.message.channel.send(msg)
+        await ctx.message.channel.send(self.players[str(ctx.message.author)].get_infos())
 
     @commands.command("buildShip")
-    async def build_ship(self, ctx):
+    @is_player_initialized
+    @parse_grammar(grammar=GRAMMAR_COMMAND_BUILDSHIP)
+    async def build_ship(self, ctx, formated_tree):
         """
         !buildShip name nb_targets tankiness investment: Use money to build a ship
         """
-        if str(ctx.message.author) in self.players:
-            try:
-                formated_tree = formated_tree_from_grammar(
-                    GRAMMAR_COMMAND_BUILDSHIP, ctx.message.content)
-                self.players[str(ctx.message.author)].create_ship(
-                    formated_tree[1][0], int(formated_tree[2][0]), int(formated_tree[3][0]),
-                    int(formated_tree[4][0]))
-                await ctx.message.channel.send(f"{formated_tree[1][0]} created !")
-            except parsimonious.exceptions.ParseError:
-                await ctx.message.channel.send("error, use: \"!help buildShip\"")
-            except TooLowInvestment:
-                await ctx.message.channel.send("Minimum investment: 50")
-            except NotEnoughMoney:
-                await ctx.message.channel.send("Not enough money")
-        else:
-            msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race'"
-            await ctx.message.channel.send(msg)
+        try:
+            self.players[str(ctx.message.author)].create_ship(
+                formated_tree[1][0], int(formated_tree[2][0]), int(formated_tree[3][0]),
+                int(formated_tree[4][0]))
+            await ctx.message.channel.send(f"{formated_tree[1][0]} created !")
+        except TooLowInvestment:
+            await ctx.message.channel.send("Minimum investment: 50")
+        except NotEnoughMoney:
+            await ctx.message.channel.send("Not enough money")
 
     @commands.command("attack")
-    async def attack(self, ctx):
+    @is_player_initialized
+    @parse_grammar(grammar=GRAMMAR_COMMAND_ATTACK)
+    async def attack(self, ctx, formated_tree):
         "!attack other_player: Fight against another player"
-        if str(ctx.message.author) in self.players:
-            try:
-                formated_tree = formated_tree_from_grammar(
-                    GRAMMAR_COMMAND_ATTACK, ctx.message.content)
-                if (formated_tree[1][0] in self.players and
-                        formated_tree[1][0] != str(ctx.message.author)):
-                    fight_msg = fight_simulator(
-                        self.players[str(ctx.message.author)], self.players[formated_tree[1][0]])
-                    await ctx.message.channel.send(fight_msg)
-                else:
-                    await ctx.message.channel.send("You can't fight against yourself !")
-            except parsimonious.exceptions.ParseError:
-                await ctx.message.channel.send("error, use \"help attack\"")
+        if (formated_tree[1][0] in self.players and formated_tree[1][0] != str(ctx.message.author)):
+            fight_msg = fight_simulator(
+                self.players[str(ctx.message.author)], self.players[formated_tree[1][0]])
+            await ctx.message.channel.send(fight_msg)
         else:
-            msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race'"
-            await ctx.message.channel.send(msg)
+            await ctx.message.channel.send("You can't fight against yourself !")
+
+    async def send_money(self, ctx, formated_tree):
+        "Send money from the !give command"
+        try:
+            self.players[str(ctx.message.author)].send_money(
+                self.players[formated_tree[1][0]], int(formated_tree[2, 1]))
+        except NotEnoughMoney:
+            await ctx.message.channel.send("Not enough money")
+
+    async def send_ship(self, ctx, formated_tree):
+        "Send ship from the !give command"
+        try:
+            self.players[str(ctx.message.author)].send_ship(
+                self.players[formated_tree[1][0]], formated_tree[2, 1])
+        except NoShip:
+            await ctx.message.channel.send("Ship name does not exist")
+
+    @commands.command("send")
+    @is_player_initialized
+    @parse_grammar(grammar=GRAMMAR_COMMAND_SEND)
+    async def give(self, ctx, formated_tree):
+        """Send money or ship to another player
+        example1: !send "playername" money 300
+        example2: !send "playername" ship "shipname"
+        """
+        if formated_tree[1][0] in self.players:
+            if formated_tree[2][0] == "money":
+                await self.send_money(ctx, formated_tree)
+            else:
+                await self.send_ship(ctx, formated_tree)
+        else:
+            await ctx.message.channel.send("Targeted player does not exist.")
+
+    @commands.command("save")
+    async def save(self, ctx):
+        """Save the game, an auto save is done every 5 minutes"""
+        self.save_in_json_rpg()
+        await ctx.message.channel.send("Game saved")

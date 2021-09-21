@@ -48,9 +48,8 @@ class Ship():
     @property
     def power(self):
         "Return a number representing the powerfullness of this ship"
-        return int(
-            (self.cur_hp / 5 + self.aoe * 50 + self.damages)
-            ** (1 + self.tech / 50) ** (1 + self.level / 50))
+        return int((self.cur_hp / 20 + self.aoe * 50 + self.damages)
+                   ** (1 + self.tech / 50) ** (1 + self.level / 50))
 
     @property
     def percent(self):
