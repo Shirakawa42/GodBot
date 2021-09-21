@@ -16,4 +16,5 @@ src/GodBot/ship_class.py
 src/GodBot.egg-info/PKG-INFO
 src/GodBot.egg-info/SOURCES.txt
 src/GodBot.egg-info/dependency_links.txt
+src/GodBot.egg-info/requires.txt
 src/GodBot.egg-info/top_level.txt

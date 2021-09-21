@@ -4,10 +4,3 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
-
-[project]
-dependencies = [
-    "discord >= 1.7.3",
-    "parsimonious >= 0.8.1",
-    "python-dotenv >= 0.19.0"
-]
