@@ -147,7 +147,7 @@ class RpgCommands(commands.Cog):
         "Send money from the !give command"
         try:
             self.players[str(ctx.message.author)].send_money(
-                self.players[formated_tree[1][0]], int(formated_tree[2, 1]))
+                self.players[formated_tree[1][0]], int(formated_tree[2][1]))
         except NotEnoughMoney:
             await ctx.message.channel.send("Not enough money")
 
@@ -155,7 +155,7 @@ class RpgCommands(commands.Cog):
         "Send ship from the !give command"
         try:
             self.players[str(ctx.message.author)].send_ship(
-                self.players[formated_tree[1][0]], formated_tree[2, 1])
+                self.players[formated_tree[1][0]], formated_tree[2][1])
         except NoShip:
             await ctx.message.channel.send("Ship name does not exist")
 
@@ -180,3 +180,13 @@ class RpgCommands(commands.Cog):
         """Save the game, an auto save is done every 5 minutes"""
         self.save_in_json_rpg()
         await ctx.message.channel.send("Game saved")
+
+    @commands.command("players")
+    async def players_cmd(self, ctx):
+        """List all players"""
+        msg = "```"
+        for player_name, player in self.players.items():
+            msg += f'''{player_name}: level {player.level} | '''
+            msg += f'''army power: {player.army_power} | money: {player.money}\n'''
+        msg += "```"
+        await ctx.message.channel.send(msg)
