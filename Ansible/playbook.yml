@@ -1,0 +1,23 @@
+---
+  - name: GodBot playbook
+    hosts: GodBot
+    become: yes
+    become_user: ubuntu
+    tasks:
+      - name: clone / pull repo
+        git:
+          repo: https://github.com/Shirakawa42/GodBot.git
+          dest: /home/ubuntu/GodBot_git
+      - name: delete old .env and create new one
+        shell:
+          cmd: rm -rf .env & python3 -m venv .env
+          chdir: /home/ubuntu/GodBot
+      - name: install godbot package
+        pip:
+          name: /home/ubuntu/GodBot_git/dist/GodBot-0.0.2.tar.gz
+          virtualenv: /home/ubuntu/GodBot/.env
+      - name: run godbot script
+        shell:
+          cmd: /home/ubuntu/GodBot/.env/bin/python3 /home/ubuntu/GodBot_git/start_bot.py
+        async: 10
+        poll: 0
