@@ -24,6 +24,7 @@ def is_player_initialized(function):
         else:
             msg = f"Player '{ctx.message.author}' not initialized, please use !initPlayer \"race\""
             await ctx.message.channel.send(msg)
+    new_function.__doc__ = function.__doc__
     return new_function
 
 
@@ -38,6 +39,7 @@ def parse_grammar(grammar):
             except parsimonious.exceptions.ParseError:
                 await ctx.message.channel.send(
                     "Command not well formated, use !help \"command name\"")
+        new_function.__doc__ = function.__doc__
         return new_function
     return parse_grammar_dec
 
