@@ -29,7 +29,3 @@ class GodBot(commands.Bot):
     def start_bot(self):
         "Start the bot"
         self.run(self.bot_token)
-
-
-BOT = GodBot()
-BOT.start_bot()
