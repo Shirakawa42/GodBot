@@ -16,8 +16,10 @@
         pip:
           name: /home/ubuntu/GodBot_git/dist/GodBot-0.0.2.tar.gz
           virtualenv: /home/ubuntu/GodBot/.env
+      - name: kill old tmux session
+        shell:
+          cmd: tmux kill-session -t godbot
+        ignore_errors: yes
       - name: run godbot script
         shell:
-          cmd: /home/ubuntu/GodBot/.env/bin/python3 /home/ubuntu/GodBot_git/start_bot.py
-        async: 10
-        poll: 0
+          cmd: tmux new-session -d -s "godbot" /home/ubuntu/GodBot/.env/bin/python3 /home/ubuntu/GodBot_git/start_bot.py
