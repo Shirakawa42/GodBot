@@ -8,5 +8,6 @@ class NotEnoughMoney(Exception):
 class TooLowInvestment(Exception):
     "Investment too low"
 
+
 class NoShip(Exception):
     "Ship not found"

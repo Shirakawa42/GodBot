@@ -7,9 +7,9 @@ from pathlib import Path
 
 from discord.ext import commands
 import parsimonious
-from check_condition import is_condition_true, execute_action
-from parser_functions import formated_tree_from_grammar
-from parser_grammars import GRAMMAR_COMMAND_WHEN
+from GodBot.check_condition import is_condition_true, execute_action
+from GodBot.parser_functions import formated_tree_from_grammar
+from GodBot.parser_grammars import GRAMMAR_COMMAND_WHEN
 
 
 class HandleMessage(commands.Cog):

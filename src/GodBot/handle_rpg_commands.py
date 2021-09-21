@@ -7,12 +7,12 @@ from pathlib import Path
 
 from discord.ext import commands, tasks
 import parsimonious
-from player_class import Player
-from rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
-from parser_grammars import GRAMMAR_COMMAND_INITPLAYER, GRAMMAR_COMMAND_SEND
-from parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
-from parser_functions import formated_tree_from_grammar
-from rpg_functions import fight_simulator
+from GodBot.player_class import Player
+from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
+from GodBot.parser_grammars import GRAMMAR_COMMAND_INITPLAYER, GRAMMAR_COMMAND_SEND
+from GodBot.parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
+from GodBot.parser_functions import formated_tree_from_grammar
+from GodBot.rpg_functions import fight_simulator
 
 
 def is_player_initialized(function):
