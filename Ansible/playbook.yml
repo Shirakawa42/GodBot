@@ -10,7 +10,7 @@
           dest: /home/ubuntu/GodBot_git
       - name: delete old .env and create new one
         shell:
-          cmd: rm -rf .env & python3 -m venv .env
+          cmd: rm -rf .env && python3 -m venv .env
           chdir: /home/ubuntu/GodBot
       - name: install godbot package
         pip:

@@ -91,7 +91,7 @@ class RpgCommands(commands.Cog):
         if str(ctx.message.author) in self.players:
             await ctx.message.channel.send(self.players[str(ctx.message.author)].get_infos())
         else:
-            msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race' test"
+            msg = f"Player '{ctx.message.author}' not initialized, please use '!initPlayer race'"
             await ctx.message.channel.send(msg)
 
     @commands.command("buildShip")
