@@ -1,52 +1,9 @@
 """ Bot Command Parser """
 
 
-import re
-
 from parsimonious.grammar import Grammar
-
-
-def node_explorer(node, child_list):
-    "Recursive function to get text from most distant nodes"
-    for child in node.children:
-        ret = node_explorer(child, child_list)
-        if isinstance(ret, str):
-            child_list.append(ret)
-    if len(node.children) >= 1:
-        return child_list
-    return node.text
-
-
-def tree_reader(tree):
-    """read the tree obtained from the parsimonious parser and return a
-    list of list of strings containing only relevant nodes"""
-    tree_list = []
-    for node in tree:
-        read_node = node_explorer(node, [])
-        if isinstance(read_node, list):
-            tree_list.append(read_node)
-        else:
-            tree_list.append([read_node])
-    return tree_list
-
-
-def format_tree_list(tree_list):
-    "remove useless texts from the tree_list returned by tree_reader"
-    match_tuple = (r"^s*\(s*$", r"^s*\)s*$", r"^s*&s*$")
-    compiled_list = []
-    for regex_str in match_tuple:
-        compiled_list.append(re.compile(regex_str))
-    for i, instruction_list in enumerate(tree_list):
-        for instruction in instruction_list:
-            for regex in compiled_list:
-                if regex.match(instruction):
-                    instruction_list.remove(instruction)
-        for j, _ in enumerate(instruction_list):
-            instruction_list[j] = instruction_list[j].strip()
-            if instruction_list[j].startswith('"') and instruction_list[j].endswith('"'):
-                instruction_list[j] = instruction_list[j].removeprefix('"').removesuffix('"')
-        tree_list[i] = list(dict.fromkeys(instruction_list))
-    return tree_list
+from parsimonious.nodes import NodeVisitor
+from parsimonious.exceptions import ParseError
 
 
 def format_rule_list(command_data, validator=False):
@@ -138,7 +95,7 @@ GRAMMAR_MAKER_COMMANDS = {
 def grammar_maker(*rules, depth=0, counter=None):
     """
     Return a Grammar() of the input from easy to use arguments
-    args: word - "any" - "nb" - [...] - "or" [[], []] - "multi" []
+    args: word - "any" - "nb" - "or" [[], []] - "multi" []
     first argument is always the command
     """
     if depth == 0:
@@ -171,6 +128,85 @@ def grammar_maker(*rules, depth=0, counter=None):
     return [grammar_validator, grammar_rules]
 
 
+def format_treevisitor_str(treevisitor_str: str):
+    """
+    Transform a string like "(message & author)" into ["message", "author"]
+    or "(message)" into "message"
+    """
+    treevisitor_str = treevisitor_str.removeprefix("(").removesuffix(")")
+    if "&" in treevisitor_str:
+        word_list = treevisitor_str.split("&")
+        for i , _ in enumerate(word_list):
+            word_list[i] = word_list[i].strip('" ')
+        return word_list
+    return treevisitor_str.strip().removeprefix('"').removesuffix('"')
+
+
+def node_visitor(node):
+    "Visit nodes to find each words instead of an entire rule"
+    end_nodes = []
+    for child in node.children:
+        end_nodes += node_visitor(child)
+    if len(node.children) == 0:
+        return [node.text.strip().removeprefix('"').removesuffix('"')]
+    return end_nodes
+
+
+def node_words_formatter(node_words: list[str]):
+    """Format the list returned by node_visitor()"""
+    if len(node_words) == 1:
+        return node_words[0]
+    print(node_words)
+    node_words = list(filter(lambda word: word not in ["(", ")", "", "&"], node_words))
+    return node_words
+
+
+class TreeVisitor(NodeVisitor):
+    """Format the tree obtained by grammar.parse()"""
+    # pylint: disable=unused-argument
+    def visit_validator(self, node, visited_children):
+        """ Returns the overall output. """
+        output = []
+        for child in visited_children:
+            if isinstance(child, int):
+                output.append(child)
+            else:
+                child = node_visitor(child)
+                child = node_words_formatter(child)
+                if isinstance(child, str):
+                    child = child.strip()
+                    child = format_treevisitor_str(child)
+                output.append(child)
+        return output[1:]
+
+    # pylint: disable=unused-argument
+    def visit_nb(self, node, visited_children):
+        """ Return an int when it's a number node """
+        return int(node.text)
+
+    def generic_visit(self, node, visited_children):
+        """ The generic visit method. """
+        return node
+
+
 def formated_tree_from_grammar(grammar: Grammar, input_str: str):
     "Return a formated tree of a grammar with the input"
-    return format_tree_list(tree_reader(grammar.parse(input_str)))
+    tree = grammar.parse(input_str)
+    tree_visitor = TreeVisitor()
+    return tree_visitor.visit(tree)
+
+
+def parse_grammar(grammar: Grammar):
+    """Decorator that check if grammar is valid or not with the input,
+        if not, function is not called and print error"""
+    def parse_grammar_dec(function):
+        async def new_function(self, ctx):
+            try:
+                formated_tree = formated_tree_from_grammar(grammar, ctx.message.content)
+                await function(self, ctx, *formated_tree)
+            except ParseError:
+                await ctx.message.channel.send(
+                    "Command not well formated, use !help \"command name\"")
+        new_function.__doc__ = function.__doc__
+        return new_function
+    return parse_grammar_dec

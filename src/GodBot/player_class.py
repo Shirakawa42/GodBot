@@ -2,6 +2,8 @@
 
 
 from random import randint
+from typing import Optional
+
 from GodBot.ship_class import Ship
 from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
 
@@ -10,19 +12,21 @@ class Player():
 
     """This class contains player data"""
 
-    def __init__(self, name, race, player_data=None):
-        if player_data is None:
-            player_data = {}
+    def __init__(
+        self,
+        name: str,
+        race: str,
+        level: Optional[int] = 1,
+        tech: Optional[int] = 1,
+        money: Optional[int] = 500,
+        army: list[Ship] = None
+        ):
         self.name = name
-        self.level = 1 if "level" not in player_data else player_data["level"]
-        self.tech = 1 if "tech" not in player_data else player_data["tech"]
-        self.money = 500 if "money" not in player_data else player_data["money"]
+        self.level = level
+        self.tech = tech
+        self.money = money
         self.race = race
-        self.army = []
-        if "army" in player_data:
-            for ship in player_data["army"]:
-                self.army.append(Ship(ship["name"], ship["aoe"], ship["max_hp"],
-                                      ship["damages"], ship["level"], ship["tech"]))
+        self.army = army or []
 
     def periodic_money(self):
         "Add money based on level and tech"

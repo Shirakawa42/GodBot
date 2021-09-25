@@ -28,27 +28,27 @@ def msg_text(subject, message):
     return message.content
 
 
-def is_condition_true(condition, message):
+def is_condition_true(subjects, comparators, cmp_param, message):
     "Check if given condition in true or not when applied to the message"
-    for subject in condition[0]:
+    for subject in subjects:
         msg_content = msg_text(subject, message)
-        for cmp_f in condition[1]:
+        for cmp_f in comparators:
             cmp_func = COMPARE_FUNCS[cmp_f]
-            if not cmp_func(str(msg_content), str(condition[2][0])):
+            if not cmp_func(str(msg_content), str(cmp_param)):
                 return False
     return True
 
 
-async def execute_action(action_list, message):
+async def execute_action(actions, action_param, message):
     "Execute all actions in the action_list on the message / message channel"
-    for action in action_list[0]:
+    for action in actions:
         try:
             if action == 'send':
-                await message.channel.send(action_list[1][0])
+                await message.channel.send(action_param)
             elif action == 'delete':
                 await message.delete()
             elif action == 'react':
-                await message.add_reaction(action_list[1][0])
+                await message.add_reaction(action_param)
         except commands.MessageNotFound:
             print("Message does not exist or have already been deleted")
 
