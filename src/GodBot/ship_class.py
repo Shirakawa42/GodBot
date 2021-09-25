@@ -40,7 +40,7 @@ class Ship():
         self.cur_hp = self.max_hp
         self.damages = int(self.damages * 1.05)
 
-    def attack_army(self, army):
+    def attack_army(self, army: list['Ship']):
         "Order this ship to shoot randomly in an army"
         for _ in range(self.aoe):
             army[randint(0, len(army))].damages_ship(self)

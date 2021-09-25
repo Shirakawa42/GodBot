@@ -4,9 +4,10 @@
 import re
 
 from discord.ext import commands
+from discord.message import Message
 
 
-def match(str1, str2):
+def match(str1: str, str2: str):
     "check if str1 match with str2, support regex"
     if str2 in str1:
         return True
@@ -14,12 +15,12 @@ def match(str1, str2):
         str2 = re.compile(str2)
         if str2.match(str1) is not None:
             return True
-    except re.error:
-        print("Regex not valid")
+    except re.error as err_msg:
+        print(err_msg)
     return False
 
 
-def msg_text(subject, message):
+def msg_text(subject: str, message: Message):
     "Return which part of the message is used depending on what is the subject"
     if subject == 'author':
         return message.author
@@ -28,7 +29,8 @@ def msg_text(subject, message):
     return message.content
 
 
-def is_condition_true(subjects, comparators, cmp_param, message):
+def is_condition_true(
+    subjects: list[str], comparators: list[str], cmp_param: str, message: Message):
     "Check if given condition in true or not when applied to the message"
     for subject in subjects:
         msg_content = msg_text(subject, message)
@@ -39,7 +41,7 @@ def is_condition_true(subjects, comparators, cmp_param, message):
     return True
 
 
-async def execute_action(actions, action_param, message):
+async def execute_action(actions: list[str], action_param: str, message: Message):
     "Execute all actions in the action_list on the message / message channel"
     for action in actions:
         try:
@@ -49,8 +51,8 @@ async def execute_action(actions, action_param, message):
                 await message.delete()
             elif action == 'react':
                 await message.add_reaction(action_param)
-        except commands.MessageNotFound:
-            print("Message does not exist or have already been deleted")
+        except commands.MessageNotFound as err_msg:
+            print(err_msg)
 
 
 COMPARE_FUNCS = {

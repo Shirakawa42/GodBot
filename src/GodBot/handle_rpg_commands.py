@@ -59,7 +59,7 @@ class RpgCommands(commands.Cog):
 
     @commands.command("initPlayer")
     @parse_grammar(grammar=GRAMMAR_COMMAND_INITPLAYER)
-    async def init_player(self, ctx, player_race: str):
+    async def init_player(self, ctx: commands.Context, player_race: str):
         "!initPlayer \"race\": Initialize yourself"
         if str(ctx.message.author) not in self.players:
             self.players[str(ctx.message.author)] = Player(
@@ -69,15 +69,15 @@ class RpgCommands(commands.Cog):
 
     @commands.command("showMe")
     @is_player_initialized
-    async def show_me(self, ctx):
+    async def show_me(self, ctx: commands.Context):
         "!showMe: Show all informations about yourself"
         await ctx.message.channel.send(self.players[str(ctx.message.author)].get_infos())
 
     @commands.command("buildShip")
     @is_player_initialized
     @parse_grammar(grammar=GRAMMAR_COMMAND_BUILDSHIP)
-    async def build_ship(
-        self, ctx, ship_name: str, ship_aoe: int, ship_tankiness: int, investment: int):
+    async def build_ship(self, ctx: commands.Context, ship_name: str,
+                         ship_aoe: int, ship_tankiness: int, investment: int):
         """
         !buildShip name nb_targets tankiness investment: Use money to build a ship
         """
@@ -85,15 +85,15 @@ class RpgCommands(commands.Cog):
             self.players[str(ctx.message.author)].create_ship(
                 ship_name, ship_aoe, ship_tankiness, investment)
             await ctx.message.channel.send(f"{ship_name} created !")
-        except TooLowInvestment:
-            await ctx.message.channel.send("Minimum investment: 50")
-        except NotEnoughMoney:
-            await ctx.message.channel.send("Not enough money")
+        except TooLowInvestment as error_msg:
+            await ctx.message.channel.send(error_msg)
+        except NotEnoughMoney as error_msg:
+            await ctx.message.channel.send(error_msg)
 
     @commands.command("attack")
     @is_player_initialized
     @parse_grammar(grammar=GRAMMAR_COMMAND_ATTACK)
-    async def attack(self, ctx, other_player: str):
+    async def attack(self, ctx: commands.Context, other_player: str):
         "!attack other_player: Fight against another player"
         if (other_player in self.players and other_player != str(ctx.message.author)):
             fight_msg = fight_simulator(
@@ -102,7 +102,7 @@ class RpgCommands(commands.Cog):
         else:
             await ctx.message.channel.send("You can't fight against yourself !")
 
-    async def send_money(self, ctx, other_player: str, amount: int):
+    async def send_money(self, ctx: commands.Context, other_player: str, amount: int):
         "Send money from the !give command"
         try:
             self.players[str(ctx.message.author)].send_money(
@@ -110,7 +110,7 @@ class RpgCommands(commands.Cog):
         except NotEnoughMoney:
             await ctx.message.channel.send("Not enough money")
 
-    async def send_ship(self, ctx, other_player: str, ship_name: str):
+    async def send_ship(self, ctx: commands.Context, other_player: str, ship_name: str):
         "Send ship from the !give command"
         try:
             self.players[str(ctx.message.author)].send_ship(
@@ -121,7 +121,8 @@ class RpgCommands(commands.Cog):
     @commands.command("send")
     @is_player_initialized
     @parse_grammar(grammar=GRAMMAR_COMMAND_SEND)
-    async def give(self, ctx, other_player: str, action: str, action_parameter: Union[str, int]):
+    async def give(self, ctx: commands.Context, other_player: str,
+                   action: str, action_parameter: Union[str, int]):
         """Send money or ship to another player
         example1: !send "playername" money 300
         example2: !send "playername" ship "shipname"
@@ -135,13 +136,13 @@ class RpgCommands(commands.Cog):
             await ctx.message.channel.send("Targeted player does not exist.")
 
     @commands.command("save")
-    async def save(self, ctx):
+    async def save(self, ctx: commands.Context):
         """Save the game, an auto save is done every 5 minutes"""
         self.save_in_db_rpg()
         await ctx.message.channel.send("Game saved")
 
     @commands.command("players")
-    async def players_cmd(self, ctx):
+    async def players_cmd(self, ctx: commands.Context):
         """List all players"""
         msg = "```"
         for player_name, player in self.players.items():

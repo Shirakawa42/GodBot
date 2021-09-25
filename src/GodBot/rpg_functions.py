@@ -1,11 +1,14 @@
 """This module contains all functions needed for the RPG to work"""
 
 
-ARMY_POWER_DIFFERENCE = 3
+from GodBot.player_class import Player
+
+
+ARMY_POWER_DIFFERENCE = 3.0
 ARMY_HONORABLE_DIFFERENCE = 1.5
 
 
-def compare_army_power(attacker_army_power, defender_army_power, multiplier):
+def compare_army_power(attacker_army_power: int, defender_army_power: int, multiplier: float):
     """Return True if the attacker army power is less than
     defender army power * multiplier, else return False"""
     if attacker_army_power >= multiplier * defender_army_power:
@@ -13,7 +16,7 @@ def compare_army_power(attacker_army_power, defender_army_power, multiplier):
     return True
 
 
-def check_war_winner(attacker, defender):
+def check_war_winner(attacker: Player, defender: Player):
     """Check who won the war, call the win() function
     and level up ships if the fight was honorable"""
     if len(attacker.army) > 0:
@@ -29,7 +32,7 @@ def check_war_winner(attacker, defender):
     return win_string
 
 
-def fight_simulator(attacker, defender):
+def fight_simulator(attacker: Player, defender: Player):
     "Simulate the fight between 2 players !"
     fight_msg = ""
     army_powers = [attacker.army_power, defender.army_power]

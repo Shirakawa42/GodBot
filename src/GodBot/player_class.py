@@ -32,12 +32,12 @@ class Player():
         "Add money based on level and tech"
         self.money += self.level + self.tech
 
-    def won(self, looser):
+    def won(self, looser: 'Player'):
         "called when the player win a fight"
         self.money += int(looser.money / 2)
         looser.money /= 2
 
-    def send_money(self, other_player, amount):
+    def send_money(self, other_player: 'Player', amount: int):
         "send money to another player"
         if self.money >= amount:
             self.money -= amount
@@ -45,7 +45,7 @@ class Player():
         else:
             raise NotEnoughMoney
 
-    def send_ship(self, other_player, ship_name):
+    def send_ship(self, other_player: 'Player', ship_name: str):
         "send ship to another player"
         ship_found = False
         for ship in self.army:
@@ -63,12 +63,12 @@ class Player():
             self.money += investment
             self.create_ship("lucky", randint(1, 4), randint(1, 5), investment)
 
-    def create_ship(self, ship_name, ship_aoe, ship_tankiness, investment):
+    def create_ship(self, ship_name: str, ship_aoe: int, ship_tankiness: int, investment: int):
         "ship: {ship_name, aoe, hp, max_hp, damages, tech}"
         if investment > self.money:
-            raise NotEnoughMoney
+            raise NotEnoughMoney(self.money)
         if investment < 50:
-            raise TooLowInvestment
+            raise TooLowInvestment(investment)
         ship_aoe = max(1, ship_aoe)
         ship_tankiness = max(1, ship_tankiness)
         if ship_aoe > investment / 2:
