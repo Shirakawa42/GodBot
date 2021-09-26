@@ -9,13 +9,6 @@ from GodBot.parser_functions import parse_grammar
 from GodBot.parser_grammars import GRAMMAR_COMMAND_WHEN
 
 
-def to_list(item: str):
-    "Transform a string into a list, if it's something else, return it"
-    if isinstance(item, str):
-        return [item]
-    return item
-
-
 class HandleMessage(commands.Cog):
 
     """This class is used by GodBot() to handle messages and commands from users"""
@@ -34,8 +27,8 @@ class HandleMessage(commands.Cog):
         if message.author == self.bot.user:
             return
         for when in self.whens:
-            if is_condition_true(when["subject"], when["comparator"], when["cmp_param"], message):
-                await execute_action(when["actions"], when["action_param"], message)
+            if is_condition_true(when["subjects"], when["comparators"], when["cmp_param"], message):
+                await execute_action(when["actions"], when["actions_param"], message)
 
     @commands.command("reset")
     async def reset(self, ctx: commands.Context):
@@ -46,8 +39,8 @@ class HandleMessage(commands.Cog):
 
     @commands.command("when")
     @parse_grammar(GRAMMAR_COMMAND_WHEN)
-    async def when(
-        self, ctx: commands.Context, subject: str, comparator: str, cmp_param: str, action: str):
+    async def when(self, ctx: commands.Context, subjects: list[str], comparators: list[str],
+                   cmp_param: str, actions: list[str], actions_param):
         """
         !when subject comparator text action text: Create a rule
         example 1: !when message equal "nice" react ":+1:"
@@ -55,13 +48,10 @@ class HandleMessage(commands.Cog):
         example 3: !when message match "insulte" delete
         """
         del ctx
-        action = to_list(action)
-        if len(action) == 1:
-            action.append("")
         self.whens.append({
-            "subject": to_list(subject),
-            "comparator": to_list(comparator),
+            "subjects": subjects,
+            "comparators": comparators,
             "cmp_param": cmp_param,
-            "actions": action[:-1],
-            "action_param": action[-1]
+            "actions": actions,
+            "actions_param": actions_param
         })

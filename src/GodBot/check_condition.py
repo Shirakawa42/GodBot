@@ -8,12 +8,10 @@ from discord.message import Message
 
 
 def match(str1: str, str2: str):
-    "check if str1 match with str2, support regex"
-    if str2 in str1:
-        return True
+    "check if str1 match with str2 using regex"
     try:
-        str2 = re.compile(str2)
-        if str2.match(str1) is not None:
+        str2_reg = re.compile(str2)
+        if str2_reg.match(str1) is not None:
             return True
     except re.error as err_msg:
         print(err_msg)

@@ -5,7 +5,7 @@ from typing import Union
 
 from discord.ext import commands, tasks
 from GodBot.player_class import Player
-from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
+from GodBot.exceptions import NotEnoughMoney, TooLowInvestment, NoShip
 from GodBot.parser_grammars import GRAMMAR_COMMAND_INITPLAYER, GRAMMAR_COMMAND_SEND
 from GodBot.parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
 from GodBot.parser_functions import parse_grammar

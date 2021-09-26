@@ -5,7 +5,7 @@ from random import randint
 from typing import Optional
 
 from GodBot.ship_class import Ship
-from GodBot.rpg_exceptions import NotEnoughMoney, TooLowInvestment, NoShip
+from GodBot.exceptions import NotEnoughMoney, TooLowInvestment, NoShip
 
 
 class Player():
