@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.message import Message
 
 from GodBot.check_condition import is_condition_true, execute_action
+from GodBot.exceptions import WrongInput
 from GodBot.parser_functions import parse_grammar
 from GodBot.parser_grammars import GRAMMAR_COMMAND_WHEN
 
@@ -48,6 +49,9 @@ class HandleMessage(commands.Cog):
         example 3: !when message match "insulte" delete
         """
         del ctx
+        for action in actions:
+            if action != "delete" and actions_param == "":
+                raise WrongInput(f"{action} needs a parameter")
         self.whens.append({
             "subjects": subjects,
             "comparators": comparators,
