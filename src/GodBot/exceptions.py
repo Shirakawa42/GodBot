@@ -9,8 +9,8 @@ class NotEnoughMoney(Exception):
 
 class TooLowInvestment(Exception):
     "Investment too low"
-    def __init__(self, investment):
-        super().__init__(f"{investment} is too low, you must invest at least 50.")
+    def __init__(self, investment, req_investment):
+        super().__init__(f"{investment} is too low, you must invest at least {req_investment}.")
 
 
 class NoShip(Exception):
@@ -19,3 +19,13 @@ class NoShip(Exception):
 
 class WrongInput(Exception):
     "Called when the user input is not well formated"
+
+
+class DataBaseNotConnected(Exception):
+    "Called when the database is used but not connected"
+
+
+class NoEnvException(Exception):
+    "Exception raised when an environment variable is not found"
+    def __init__(self, environment_variable) -> None:
+        super().__init__(f"{environment_variable} not found in environment variables.")

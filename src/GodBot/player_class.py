@@ -22,9 +22,9 @@ class Player():
         army: list[Ship] = None
         ):
         self.name = name
-        self.level = level
-        self.tech = tech
-        self.money = money
+        self.level = int(level)
+        self.tech = int(tech)
+        self.money = int(money)
         self.race = race
         self.army = army or []
 
@@ -68,7 +68,7 @@ class Player():
         if investment > self.money:
             raise NotEnoughMoney(self.money)
         if investment < 50:
-            raise TooLowInvestment(investment)
+            raise TooLowInvestment(investment, 50)
         ship_aoe = max(1, ship_aoe)
         ship_tankiness = max(1, ship_tankiness)
         if ship_aoe > investment / 2:
@@ -79,7 +79,7 @@ class Player():
         ship_damages = investment / ship_aoe / ship_tankiness * (1.1 ** self.tech) * 2
         self.money -= investment
         self.army.append(Ship(ship_name, ship_aoe, int(ship_hp),
-                              int(ship_damages), 1, self.tech))
+                              int(ship_damages), 1, self.tech, self.name))
 
     def get_infos(self):
         "Return the player informations beautifully"
@@ -99,15 +99,6 @@ class Player():
         return army_power
 
     @property
-    def dict(self):
-        "Return a dict containing all player datas"
-        player_data = {
-            "name": self.name,
-            "level": self.level,
-            "money": self.money,
-            "race": self.race,
-            "tech": self.tech,
-            "army": []}
-        for ship in self.army:
-            player_data["army"].append(ship.dict)
-        return player_data
+    def tuple(self):
+        "Return a tuple containing player datas"
+        return (self.name, self.race, self.level, self.tech, self.money)

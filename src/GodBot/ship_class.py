@@ -15,6 +15,7 @@ class Ship():
     damages: int
     level: int
     tech: int
+    owner_name: str
     cur_hp: int = field(init=False)
 
     def __post_init__(self):
@@ -46,6 +47,12 @@ class Ship():
             army[randint(0, len(army))].damages_ship(self)
 
     @property
+    def tuple(self):
+        "Return a tuple containing ship datas ans player name"
+        return (self.name, self.aoe, self.max_hp, self.damages,
+                self.level, self.tech, self.owner_name)
+
+    @property
     def power(self):
         "Return a number representing the powerfullness of this ship"
         return int((self.cur_hp / 20 + self.aoe * 50 + self.damages)
@@ -61,15 +68,3 @@ class Ship():
         "Return the string of the ship"
         ship_str = f"{self.name}: {self.cur_hp}/{self.max_hp}hp - Aoe: {self.aoe} - "
         return ship_str + f"Damages: {self.damages} - Tech level: {self.tech} - Level: {self.level}"
-
-    @property
-    def dict(self):
-        "Return a dict containing all ship datas"
-        ship_data = {
-            "name": self.name,
-            "max_hp": self.max_hp,
-            "level": self.level,
-            "tech": self.tech,
-            "aoe": self.aoe,
-            "damages": self.damages}
-        return ship_data

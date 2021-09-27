@@ -9,10 +9,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from GodBot.handle_rpg_commands import RpgCommands
 from GodBot.handle_message import HandleMessage
-
-
-class NoEnvException(Exception):
-    "Exception raised when .env file not found or no DISCORD_TOKEN found"
+from GodBot.exceptions import NoEnvException
 
 
 class GodBot(commands.Bot):
@@ -22,7 +19,7 @@ class GodBot(commands.Bot):
         load_dotenv()
         self.bot_token = os.getenv("DISCORD_TOKEN")
         if self.bot_token is None:
-            raise NoEnvException(".env file not found or DISCORD_TOKEN not inside the file")
+            raise NoEnvException("DISCORD_TOKEN")
         self.add_cog(HandleMessage(self))
         self.add_cog(RpgCommands(self))
 
