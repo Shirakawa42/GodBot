@@ -10,6 +10,8 @@ from GodBot.parser_grammars import GRAMMAR_COMMAND_INITPLAYER, GRAMMAR_COMMAND_S
 from GodBot.parser_grammars import GRAMMAR_COMMAND_BUILDSHIP, GRAMMAR_COMMAND_ATTACK
 from GodBot.parser_functions import parse_grammar
 from GodBot.rpg_functions import fight_simulator
+from GodBot.postgresql import db_command, db_insert_rows
+from GodBot.ship_class import Ship
 
 
 def is_player_initialized(function):
@@ -32,7 +34,14 @@ class RpgCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.players = {}
-        # load players from DB
+        db_players = db_command("select * from players")
+        db_ships = db_command("select * from ships")
+        for db_player in db_players:
+            db_player_army = []
+            for db_ship in db_ships:
+                if db_ship["player_name"] == db_player["name"]:
+                    db_player_army.append(Ship(*db_ship))
+            self.players[db_player["name"]] = Player(*db_player, army=db_player_army)
 
     @tasks.loop(seconds=8)
     async def eight_sec_loop(self):
@@ -56,6 +65,19 @@ class RpgCommands(commands.Cog):
 
     def save_in_db_rpg(self):
         "save everything related to the RPG inside the RDS DB"
+        db_command("delete from players")
+        db_command("delete from ships")
+        all_ships = []
+        all_players = []
+        for _, player in self.players.items():
+            for ship in player.army:
+                all_ships.append(ship.tuple)
+            all_players.append(player.tuple)
+        if len(all_players) > 0:
+            db_insert_rows("players", all_players)
+        if len(all_ships) > 0:
+            db_insert_rows("ships", all_ships)
+
 
     @commands.command("initPlayer")
     @parse_grammar(grammar=GRAMMAR_COMMAND_INITPLAYER)
@@ -146,7 +168,10 @@ class RpgCommands(commands.Cog):
         """List all players"""
         msg = "```"
         for player_name, player in self.players.items():
-            msg += f'''{player_name}: level {player.level} | '''
-            msg += f'''army power: {player.army_power} | money: {player.money}\n'''
+            msg += f'''{player_name}: level {player.level} | army power: {player.army_power} | '''
+            msg += f'''money: {player.money} | tech: {player.tech}\n'''
         msg += "```"
-        await ctx.message.channel.send(msg)
+        if len(self.players) != 0:
+            await ctx.message.channel.send(msg)
+        else:
+            await ctx.message.channel.send("```No players```")
