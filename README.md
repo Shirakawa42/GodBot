@@ -11,6 +11,13 @@ Installation:
 - lancer la commande "python3 -m pip install GodBot-0.0.2.tar.gz" dans le dossier dezippé
 - Créer la variable d'environnement "DISCORD_TOKEN" contenant votre token de bot discord
 
+Utilisation d'une base de donnée (optionnel, nécessite une base de donnée postgreSQL, permet de sauvegarder les joueurs et les configurations):
+- Créer une base de donnée appelée "godbot"
+- Créer la table "players" avec les champs: "name" varchar(255), "race" varchar(255), "level" int, "tech" int, "money", int
+- Créer la table "ships" avec les champs: "name" varchar(255), "aoe" int, "max_hp" int, "damages" int, "level" int, "tech" int, "player_name" varchar(255)
+- Créer la table "whens" avec les champs: "subjects" varchar(255), "comparators" varchar(255), "cmp_param" varchar(255), "actions" varchar(255), "action_param" varchar(255)
+- Créer les variables d'environnement "RDS_DB_HOST" et "RDS_DB_PWD" contenant le lien vers votre base de donnée et son mot de passe
+
 Lancement du bot:
 ```
 from GodBot.god_bot import GodBot
