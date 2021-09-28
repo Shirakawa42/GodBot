@@ -28,8 +28,3 @@ def parse_grammar(grammar: Grammar):
         new_function.__doc__ = function.__doc__
         return new_function
     return parse_grammar_dec
-
-
-def str_to_regex(string: str):
-    "Modify a string useable in a grammar rule"
-    return f'''(~"\\s*{string}" / ~'\\s*"{string}"')'''

@@ -44,7 +44,7 @@ class Ship():
     def attack_army(self, army: list['Ship']):
         "Order this ship to shoot randomly in an army"
         for _ in range(self.aoe):
-            army[randint(0, len(army))].damages_ship(self)
+            army[randint(0, len(army)-1)].damages_ship(self)
 
     @property
     def tuple(self):

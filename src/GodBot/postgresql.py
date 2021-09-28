@@ -29,7 +29,7 @@ def connect_to_db():
     return None, None
 
 
-def db_command(sqlcommand: str, cmd_datas: tuple=()):
+def db_command(sqlcommand: str, cmd_datas: tuple = ()):
     "execute a command inside the database and return the result"
     cursor, database = connect_to_db()
     if cursor is not None:

@@ -28,7 +28,7 @@ def msg_text(subject: str, message: Message):
 
 
 def is_condition_true(
-    subjects: list[str], comparators: list[str], cmp_param: str, message: Message):
+        subjects: list[str], comparators: list[str], cmp_param: str, message: Message):
     "Check if given condition in true or not when applied to the message"
     for subject in subjects:
         msg_content = msg_text(subject, message)

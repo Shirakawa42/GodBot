@@ -78,7 +78,6 @@ class RpgCommands(commands.Cog):
         if len(all_ships) > 0:
             db_insert_rows("ships", all_ships)
 
-
     @commands.command("initPlayer")
     @parse_grammar(grammar=GRAMMAR_COMMAND_INITPLAYER)
     async def init_player(self, ctx: commands.Context, player_race: str):

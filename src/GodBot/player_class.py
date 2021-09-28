@@ -13,14 +13,14 @@ class Player():
     """This class contains player data"""
 
     def __init__(
-        self,
-        name: str,
-        race: str,
-        level: Optional[int] = 1,
-        tech: Optional[int] = 1,
-        money: Optional[int] = 500,
-        army: list[Ship] = None
-        ):
+            self,
+            name: str,
+            race: str,
+            level: Optional[int] = 1,
+            tech: Optional[int] = 1,
+            money: Optional[int] = 500,
+            army: list[Ship] = None
+            ):
         self.name = name
         self.level = int(level)
         self.tech = int(tech)
@@ -50,6 +50,7 @@ class Player():
         ship_found = False
         for ship in self.army:
             if ship.name == ship_name:
+                ship.owner_name = other_player.name
                 other_player.army.append(ship)
                 self.army.remove(ship)
                 ship_found = True

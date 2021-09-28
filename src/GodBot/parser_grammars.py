@@ -3,8 +3,6 @@
 
 from parsimonious.grammar import Grammar
 
-from GodBot.parser_functions import str_to_regex
-
 
 GRAMMAR_BASIC_RULE = {
     "any": """(~'\\s*".*?"' / ~"\\s*[A-Za-z0-9]+")""",
@@ -37,9 +35,7 @@ GRAMMAR_COMMAND_BUILDSHIP = Grammar(f"""
 """)
 
 GRAMMAR_COMMAND_SEND = Grammar(f"""
-    validator = "!send" any ((money nb) / (ship any))
+    validator = "!send" any send_word any
+    send_word = {GRAMMAR_BASIC_RULE["any"]}
     any = {GRAMMAR_BASIC_RULE["any"]}
-    nb = {GRAMMAR_BASIC_RULE["nb"]}
-    money = {str_to_regex("money")}
-    ship = {str_to_regex("ship")}
 """)

@@ -10,6 +10,7 @@ from GodBot.exceptions import WrongInput
 WHEN_SUBJECTS = ["message", "author"]
 WHEN_ACTIONS = ["send", "delete", "react"]
 WHEN_CMPS = ["equal", "startswith", "endswith", "match"]
+SEND_WORDS = ["ship", "money"]
 
 
 def format_treevisitor_str(treevisitor_str: str):
@@ -22,7 +23,7 @@ def format_treevisitor_str(treevisitor_str: str):
     treevisitor_str = treevisitor_str.removeprefix("(").removesuffix(")")
     if "&" in treevisitor_str:
         word_list = treevisitor_str.split("&")
-        for i , _ in enumerate(word_list):
+        for i, _ in enumerate(word_list):
             word_list[i] = word_list[i].strip('" ')
         return word_list
     return [treevisitor_str.strip().removeprefix('"').removesuffix('"')]
@@ -75,6 +76,15 @@ class TreeVisitor(NodeVisitor):
             if subject not in WHEN_SUBJECTS:
                 raise WrongInput(f"subject '{subject}' is not inside WHEN_SUBJECTS")
         return subjects
+
+    @staticmethod
+    def visit_send_word(node: Node, visited_children: list[Union[Node, int]]):
+        """ Check if subject is valid """
+        del visited_children
+        send_word = node.text.strip().removeprefix('"').removesuffix('"')
+        if send_word not in SEND_WORDS:
+            raise WrongInput(f"Word '{send_word}' is not inside SEND_WORDS")
+        return send_word
 
     @staticmethod
     def generic_visit(node: Node, visited_children: list[Union[Node, int]]):
